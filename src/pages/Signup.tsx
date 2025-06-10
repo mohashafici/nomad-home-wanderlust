@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import Header from "@/components/Header";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -24,6 +26,17 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const { signUp, user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -32,25 +45,38 @@ const Signup = () => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match!");
+      toast({
+        title: "Error",
+        description: "Passwords don't match!",
+        variant: "destructive",
+      });
       return;
     }
     
     if (!formData.agreeTerms) {
-      alert("Please agree to the terms and conditions");
+      toast({
+        title: "Error",
+        description: "Please agree to the terms and conditions",
+        variant: "destructive",
+      });
       return;
     }
     
     setIsLoading(true);
     
-    // TODO: Implement actual signup logic
-    console.log("Signup attempt:", formData);
+    const { error } = await signUp(
+      formData.email,
+      formData.password,
+      formData.firstName,
+      formData.lastName,
+      formData.isHost
+    );
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // TODO: Handle successful signup
-    }, 1000);
+    if (!error) {
+      // Don't navigate immediately - let user confirm email first
+    }
+    
+    setIsLoading(false);
   };
 
   return (

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { User, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,10 +9,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // TODO: Replace with actual auth state
+  const { user, signOut, loading } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <header className="bg-white shadow-sm border-b">
@@ -41,41 +48,43 @@ const Header = () => {
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
-            {isLoggedIn ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex items-center space-x-2">
-                    <Menu className="h-4 w-4" />
-                    <User className="h-4 w-4" />
+            {!loading && (
+              user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center space-x-2">
+                      <Menu className="h-4 w-4" />
+                      <User className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard">Dashboard</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/bookings">My Bookings</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile">Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={handleSignOut}
+                      className="text-red-600"
+                    >
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Button variant="ghost" asChild>
+                    <Link to="/login">Login</Link>
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link to="/dashboard">Dashboard</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/bookings">My Bookings</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile">Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => setIsLoggedIn(false)}
-                    className="text-red-600"
-                  >
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <Button variant="ghost" asChild>
-                  <Link to="/login">Login</Link>
-                </Button>
-                <Button asChild className="bg-rose-500 hover:bg-rose-600">
-                  <Link to="/signup">Sign Up</Link>
-                </Button>
-              </div>
+                  <Button asChild className="bg-rose-500 hover:bg-rose-600">
+                    <Link to="/signup">Sign Up</Link>
+                  </Button>
+                </div>
+              )
             )}
 
             {/* Mobile Menu Button */}
