@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
@@ -22,7 +21,7 @@ const Login = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate("/");
+      navigate("/host-dashboard");
     }
   }, [user, navigate]);
 
@@ -33,7 +32,7 @@ const Login = () => {
     const { error } = await signIn(email, password);
     
     if (!error) {
-      navigate("/");
+      navigate("/host-dashboard");
     }
     
     setIsLoading(false);

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
@@ -33,7 +32,7 @@ const Signup = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate("/");
+      navigate("/host-dashboard");
     }
   }, [user, navigate]);
 
@@ -73,7 +72,7 @@ const Signup = () => {
     );
     
     if (!error) {
-      // Don't navigate immediately - let user confirm email first
+      // Email confirmation flow - user will be redirected after email confirmation
     }
     
     setIsLoading(false);
