@@ -26,25 +26,27 @@ const Header = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to={user ? "/host-dashboard" : "/"} className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">A</span>
             </div>
             <span className="text-xl font-bold text-gray-900">AirStay</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-700 hover:text-gray-900 font-medium">
-              Home
-            </Link>
-            <Link to="/properties" className="text-gray-700 hover:text-gray-900 font-medium">
-              Properties
-            </Link>
-            <Link to="/become-host" className="text-gray-700 hover:text-gray-900 font-medium">
-              Become a Host
-            </Link>
-          </nav>
+          {/* Desktop Navigation - Only show when NOT logged in */}
+          {!user && (
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link to="/" className="text-gray-700 hover:text-gray-900 font-medium">
+                Home
+              </Link>
+              <Link to="/properties" className="text-gray-700 hover:text-gray-900 font-medium">
+                Properties
+              </Link>
+              <Link to="/become-host" className="text-gray-700 hover:text-gray-900 font-medium">
+                Become a Host
+              </Link>
+            </nav>
+          )}
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
@@ -87,20 +89,22 @@ const Header = () => {
               )
             )}
 
-            {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            </Button>
+            {/* Mobile Menu Button - Only show when NOT logged in */}
+            {!user && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="md:hidden"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              </Button>
+            )}
           </div>
         </div>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
+        {/* Mobile Navigation - Only show when NOT logged in */}
+        {isMenuOpen && !user && (
           <nav className="md:hidden mt-4 pb-4 border-t pt-4">
             <div className="flex flex-col space-y-2">
               <Link 

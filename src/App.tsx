@@ -13,6 +13,7 @@ import BecomeHost from "./pages/BecomeHost";
 import HostDashboard from "./pages/HostDashboard";
 import PropertyDetail from "./pages/PropertyDetail";
 import MyBookings from "./pages/MyBookings";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/host-dashboard" element={<HostDashboard />} />
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/bookings" element={<MyBookings />} />
+            <Route path="/profile" element={<Profile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
