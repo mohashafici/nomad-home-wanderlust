@@ -6,15 +6,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Header from "@/components/Header";
 import PropertyCard from "@/components/PropertyCard";
+import { useProperties } from "@/hooks/useProperties";
 
 const Index = () => {
   const [searchLocation, setSearchLocation] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState("1");
+  
+  const { data: properties, isLoading } = useProperties();
 
-  // Mock data for featured properties
-  const featuredProperties = [
+  // Mock data for featured properties (fallback if no real properties)
+  const mockProperties = [
     {
       id: 1,
       title: "Cozy Beachfront Villa",
@@ -60,6 +63,21 @@ const Index = () => {
       amenities: ["WiFi", "Pool", "Gym", "Concierge"]
     }
   ];
+
+  // Convert real properties to display format or use mock data
+  const displayProperties = properties && properties.length > 0 
+    ? properties.slice(0, 4).map(property => ({
+        id: Number(property.id.split('-')[0]) || Math.random(),
+        title: property.title,
+        location: `${property.city}, ${property.state}`,
+        price: Number(property.price_per_night),
+        rating: 4.8, // Default rating
+        reviews: 42, // Default review count
+        image: property.images?.[0] || "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=800",
+        host: "Host", // Default host name
+        amenities: property.amenities || []
+      }))
+    : mockProperties;
 
   const handleSearch = () => {
     console.log("Searching for:", { searchLocation, checkIn, checkOut, guests });
@@ -142,11 +160,25 @@ const Index = () => {
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
             Featured Stays
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
+                  <div className="space-y-2">
+                    <div className="bg-gray-200 h-4 rounded"></div>
+                    <div className="bg-gray-200 h-4 rounded w-2/3"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {displayProperties.map((property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

@@ -45,6 +45,78 @@ export type Database = {
         }
         Relationships: []
       }
+      properties: {
+        Row: {
+          address: string
+          amenities: string[] | null
+          bathrooms: number
+          bedrooms: number
+          city: string
+          country: string
+          created_at: string
+          description: string | null
+          host_id: string
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          latitude: number | null
+          longitude: number | null
+          max_guests: number
+          postal_code: string | null
+          price_per_night: number
+          property_type: string
+          state: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          amenities?: string[] | null
+          bathrooms?: number
+          bedrooms?: number
+          city: string
+          country?: string
+          created_at?: string
+          description?: string | null
+          host_id: string
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          max_guests?: number
+          postal_code?: string | null
+          price_per_night: number
+          property_type?: string
+          state: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          amenities?: string[] | null
+          bathrooms?: number
+          bedrooms?: number
+          city?: string
+          country?: string
+          created_at?: string
+          description?: string | null
+          host_id?: string
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          max_guests?: number
+          postal_code?: string | null
+          price_per_night?: number
+          property_type?: string
+          state?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
