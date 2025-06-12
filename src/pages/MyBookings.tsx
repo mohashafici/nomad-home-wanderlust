@@ -1,10 +1,12 @@
 
+import { useState } from "react";
 import { Calendar, MapPin, Star, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import Header from "@/components/Header";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { ReviewForm } from "@/components/ReviewForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { useBookings } from "@/hooks/useBookings";
@@ -12,29 +14,24 @@ import { useBookings } from "@/hooks/useBookings";
 const MyBookings = () => {
   const { user } = useAuth();
   const { data: bookings, isLoading } = useBookings();
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-3xl font-bold mb-4">Please Sign In</h1>
-          <p className="text-gray-600 mb-8">You need to be signed in to view your bookings.</p>
-          <Button asChild>
-            <Link to="/login">Sign In</Link>
-          </Button>
-        </div>
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h1 className="text-3xl font-bold mb-4">Please Sign In</h1>
+        <p className="text-gray-600 mb-8">You need to be signed in to view your bookings.</p>
+        <Button asChild>
+          <Link to="/login">Sign In</Link>
+        </Button>
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <div className="animate-pulse">Loading bookings...</div>
-        </div>
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="animate-pulse">Loading bookings...</div>
       </div>
     );
   }
@@ -97,10 +94,22 @@ const MyBookings = () => {
                   <Link to={`/property/${booking.property_id}`}>View Property</Link>
                 </Button>
                 {booking.status === "completed" && (
-                  <Button variant="outline" size="sm">
-                    <Star className="h-4 w-4 mr-1" />
-                    Review
-                  </Button>
+                  <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Star className="h-4 w-4 mr-1" />
+                        Review
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <ReviewForm
+                        bookingId={booking.id}
+                        propertyId={booking.property_id}
+                        hostId={booking.properties?.host_id}
+                        onSuccess={() => setReviewDialogOpen(false)}
+                      />
+                    </DialogContent>
+                  </Dialog>
                 )}
               </div>
             </div>
@@ -111,61 +120,57 @@ const MyBookings = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Bookings</h1>
-          <p className="text-gray-600">Track your reservations and travel history</p>
-        </div>
-
-        <Tabs defaultValue="upcoming" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="upcoming">
-              Upcoming ({upcomingBookings.length})
-            </TabsTrigger>
-            <TabsTrigger value="past">
-              Past ({pastBookings.length})
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="upcoming" className="mt-6">
-            {upcomingBookings.length > 0 ? (
-              upcomingBookings.map((booking) => (
-                <BookingCard key={booking.id} booking={booking} />
-              ))
-            ) : (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No upcoming bookings</h3>
-                  <p className="text-gray-600 mb-4">Start planning your next adventure!</p>
-                  <Button asChild>
-                    <Link to="/properties">Browse Properties</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="past" className="mt-6">
-            {pastBookings.length > 0 ? (
-              pastBookings.map((booking) => (
-                <BookingCard key={booking.id} booking={booking} />
-              ))
-            ) : (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No past bookings</h3>
-                  <p className="text-gray-600">Your booking history will appear here.</p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">My Bookings</h1>
+        <p className="text-gray-600">Track your reservations and travel history</p>
       </div>
+
+      <Tabs defaultValue="upcoming" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="upcoming">
+            Upcoming ({upcomingBookings.length})
+          </TabsTrigger>
+          <TabsTrigger value="past">
+            Past ({pastBookings.length})
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="upcoming" className="mt-6">
+          {upcomingBookings.length > 0 ? (
+            upcomingBookings.map((booking) => (
+              <BookingCard key={booking.id} booking={booking} />
+            ))
+          ) : (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No upcoming bookings</h3>
+                <p className="text-gray-600 mb-4">Start planning your next adventure!</p>
+                <Button asChild>
+                  <Link to="/properties">Browse Properties</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="past" className="mt-6">
+          {pastBookings.length > 0 ? (
+            pastBookings.map((booking) => (
+              <BookingCard key={booking.id} booking={booking} />
+            ))
+          ) : (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No past bookings</h3>
+                <p className="text-gray-600">Your booking history will appear here.</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
