@@ -164,7 +164,7 @@ const MyBookings = () => {
               </Card>
             )}
           </TabsContent>
-        </tabs>
+        </Tabs>
       </div>
     </div>
   );
