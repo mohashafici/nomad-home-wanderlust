@@ -1,68 +1,17 @@
 
-import { useState } from "react";
 import { Calendar, MapPin, Star, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
+import { useBookings } from "@/hooks/useBookings";
 
 const MyBookings = () => {
   const { user } = useAuth();
-
-  // Mock bookings data - in real app, this would come from Supabase
-  const [bookings] = useState([
-    {
-      id: "1",
-      property: {
-        id: "prop1",
-        title: "Modern Downtown Apartment",
-        city: "San Francisco",
-        state: "CA",
-        images: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=400"]
-      },
-      checkIn: "2024-01-15",
-      checkOut: "2024-01-20",
-      guests: 2,
-      totalPrice: 750,
-      status: "confirmed",
-      bookingDate: "2023-12-01"
-    },
-    {
-      id: "2",
-      property: {
-        id: "prop2",
-        title: "Cozy Beach House",
-        city: "Santa Monica",
-        state: "CA",
-        images: ["https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=400"]
-      },
-      checkIn: "2023-12-10",
-      checkOut: "2023-12-15",
-      guests: 4,
-      totalPrice: 1200,
-      status: "completed",
-      bookingDate: "2023-11-01"
-    },
-    {
-      id: "3",
-      property: {
-        id: "prop3",
-        title: "Mountain Cabin Retreat",
-        city: "Lake Tahoe",
-        state: "CA",
-        images: ["https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&q=80&w=400"]
-      },
-      checkIn: "2024-02-01",
-      checkOut: "2024-02-05",
-      guests: 6,
-      totalPrice: 800,
-      status: "pending",
-      bookingDate: "2023-12-20"
-    }
-  ]);
+  const { data: bookings, isLoading } = useBookings();
 
   if (!user) {
     return (
@@ -79,11 +28,22 @@ const MyBookings = () => {
     );
   }
 
-  const upcomingBookings = bookings.filter(booking => 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <div className="animate-pulse">Loading bookings...</div>
+        </div>
+      </div>
+    );
+  }
+
+  const upcomingBookings = (bookings || []).filter(booking => 
     booking.status === "confirmed" || booking.status === "pending"
   );
   
-  const pastBookings = bookings.filter(booking => 
+  const pastBookings = (bookings || []).filter(booking => 
     booking.status === "completed"
   );
 
@@ -95,6 +55,8 @@ const MyBookings = () => {
         return "bg-yellow-100 text-yellow-800";
       case "completed":
         return "bg-gray-100 text-gray-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -105,34 +67,34 @@ const MyBookings = () => {
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row gap-4">
           <img
-            src={booking.property.images[0]}
-            alt={booking.property.title}
+            src={booking.properties?.images?.[0] || "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=400"}
+            alt={booking.properties?.title || "Property"}
             className="w-full md:w-32 h-32 object-cover rounded-lg"
           />
           <div className="flex-1">
             <div className="flex justify-between items-start mb-2">
-              <h3 className="text-lg font-semibold">{booking.property.title}</h3>
+              <h3 className="text-lg font-semibold">{booking.properties?.title || "Property"}</h3>
               <Badge className={getStatusColor(booking.status)}>
                 {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
               </Badge>
             </div>
             <div className="flex items-center text-gray-600 mb-2">
               <MapPin className="h-4 w-4 mr-1" />
-              <span>{booking.property.city}, {booking.property.state}</span>
+              <span>{booking.properties?.city}, {booking.properties?.state}</span>
             </div>
             <div className="flex items-center text-gray-600 mb-2">
               <Calendar className="h-4 w-4 mr-1" />
-              <span>{booking.checkIn} - {booking.checkOut}</span>
+              <span>{booking.check_in} - {booking.check_out}</span>
             </div>
             <div className="flex items-center text-gray-600 mb-4">
               <User className="h-4 w-4 mr-1" />
               <span>{booking.guests} guests</span>
             </div>
             <div className="flex justify-between items-center">
-              <div className="text-lg font-semibold">${booking.totalPrice} total</div>
+              <div className="text-lg font-semibold">${booking.total_price} total</div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  View Details
+                <Button variant="outline" size="sm" asChild>
+                  <Link to={`/property/${booking.property_id}`}>View Property</Link>
                 </Button>
                 {booking.status === "completed" && (
                   <Button variant="outline" size="sm">
@@ -202,7 +164,7 @@ const MyBookings = () => {
               </Card>
             )}
           </TabsContent>
-        </Tabs>
+        </tabs>
       </div>
     </div>
   );

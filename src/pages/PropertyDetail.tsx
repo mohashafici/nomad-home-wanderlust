@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Star, Heart, Share, MapPin, Wifi, Car, Utensils, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,49 +9,77 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Header from "@/components/Header";
+import { useProperty } from "@/hooks/useProperties";
+import { useCreateBooking } from "@/hooks/useBookings";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PropertyDetail = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { data: property, isLoading } = useProperty(id || '');
+  const createBooking = useCreateBooking();
+  
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState("1");
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // Mock property data
-  const property = {
-    id: 1,
-    title: "Luxurious Beachfront Villa with Infinity Pool",
-    location: "Malibu, California, United States",
-    price: 299,
-    rating: 4.9,
-    reviews: 127,
-    images: [
-      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=1200",
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=600",
-      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600",
-      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80&w=600",
-      "https://images.unsplash.com/photo-1566908829077-d35afd0c5d6d?auto=format&fit=crop&q=80&w=600"
-    ],
-    host: {
-      name: "Sarah Johnson",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b5bc?auto=format&fit=crop&q=80&w=150",
-      joinedYear: "2019",
-      isSuperhost: true
-    },
-    amenities: [
-      { icon: Wifi, name: "WiFi" },
-      { icon: Car, name: "Free parking" },
-      { icon: Utensils, name: "Kitchen" },
-      { icon: Tv, name: "TV" }
-    ],
-    description: "Experience luxury living in this stunning beachfront villa with breathtaking ocean views. The property features an infinity pool, private beach access, and modern amenities throughout. Perfect for a romantic getaway or family vacation.",
-    bedrooms: 4,
-    bathrooms: 3,
-    maxGuests: 8
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <div className="animate-pulse">Loading property...</div>
+        </div>
+      </div>
+    );
+  }
 
-  const handleBooking = () => {
-    console.log("Booking property:", { checkIn, checkOut, guests });
-    // TODO: Implement booking logic
+  if (!property) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h1 className="text-3xl font-bold mb-4">Property Not Found</h1>
+          <Button onClick={() => navigate('/properties')}>Back to Properties</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const amenities = [
+    { icon: Wifi, name: "WiFi" },
+    { icon: Car, name: "Free parking" },
+    { icon: Utensils, name: "Kitchen" },
+    { icon: Tv, name: "TV" }
+  ];
+
+  const handleBooking = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    if (!checkIn || !checkOut) return;
+
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+    const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const totalPrice = nights * property.price_per_night;
+
+    try {
+      await createBooking.mutateAsync({
+        property_id: property.id,
+        check_in: checkIn,
+        check_out: checkOut,
+        guests: parseInt(guests),
+        total_price: totalPrice,
+      });
+      navigate('/bookings');
+    } catch (error) {
+      console.error('Booking failed:', error);
+    }
   };
 
   const calculateTotal = () => {
@@ -58,7 +87,7 @@ const PropertyDetail = () => {
     const start = new Date(checkIn);
     const end = new Date(checkOut);
     const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-    return nights * property.price;
+    return nights * property.price_per_night;
   };
 
   return (
@@ -73,12 +102,12 @@ const PropertyDetail = () => {
             <div className="flex items-center space-x-4 text-gray-600">
               <div className="flex items-center space-x-1">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-medium">{property.rating}</span>
-                <span>({property.reviews} reviews)</span>
+                <span className="font-medium">4.9</span>
+                <span>(127 reviews)</span>
               </div>
               <div className="flex items-center space-x-1">
                 <MapPin className="h-4 w-4" />
-                <span>{property.location}</span>
+                <span>{property.city}, {property.state}</span>
               </div>
             </div>
           </div>
@@ -103,31 +132,31 @@ const PropertyDetail = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-8 h-96">
           <div className="md:col-span-2">
             <img 
-              src={property.images[0]} 
+              src={property.images?.[0] || "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=1200"} 
               alt="Property main"
               className="w-full h-full object-cover rounded-l-lg"
             />
           </div>
           <div className="grid grid-rows-2 gap-2">
             <img 
-              src={property.images[1]} 
+              src={property.images?.[1] || "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=600"} 
               alt="Property"
               className="w-full h-full object-cover"
             />
             <img 
-              src={property.images[2]} 
+              src={property.images?.[2] || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600"} 
               alt="Property"
               className="w-full h-full object-cover"
             />
           </div>
           <div className="grid grid-rows-2 gap-2">
             <img 
-              src={property.images[3]} 
+              src={property.images?.[3] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80&w=600"} 
               alt="Property"
               className="w-full h-full object-cover"
             />
             <img 
-              src={property.images[4]} 
+              src={property.images?.[4] || "https://images.unsplash.com/photo-1566908829077-d35afd0c5d6d?auto=format&fit=crop&q=80&w=600"} 
               alt="Property"
               className="w-full h-full object-cover rounded-r-lg"
             />
@@ -141,15 +170,15 @@ const PropertyDetail = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-semibold">
-                  Hosted by {property.host.name}
+                  Hosted by Host
                 </h2>
                 <p className="text-gray-600">
-                  {property.maxGuests} guests · {property.bedrooms} bedrooms · {property.bathrooms} bathrooms
+                  {property.max_guests} guests · {property.bedrooms} bedrooms · {property.bathrooms} bathrooms
                 </p>
               </div>
               <Avatar className="h-12 w-12">
-                <AvatarImage src={property.host.avatar} />
-                <AvatarFallback>{property.host.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src="https://images.unsplash.com/photo-1494790108755-2616b612b5bc?auto=format&fit=crop&q=80&w=150" />
+                <AvatarFallback>H</AvatarFallback>
               </Avatar>
             </div>
 
@@ -158,7 +187,7 @@ const PropertyDetail = () => {
             {/* Description */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-3">About this place</h3>
-              <p className="text-gray-700 leading-relaxed">{property.description}</p>
+              <p className="text-gray-700 leading-relaxed">{property.description || "A wonderful place to stay."}</p>
             </div>
 
             <Separator className="my-6" />
@@ -167,12 +196,16 @@ const PropertyDetail = () => {
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-3">What this place offers</h3>
               <div className="grid grid-cols-2 gap-4">
-                {property.amenities.map((amenity, index) => (
-                  <div key={index} className="flex items-center space-x-3">
-                    <amenity.icon className="h-5 w-5 text-gray-600" />
-                    <span>{amenity.name}</span>
-                  </div>
-                ))}
+                {(property.amenities || amenities.map(a => a.name)).map((amenity, index) => {
+                  const amenityIcon = amenities.find(a => a.name === amenity)?.icon || Wifi;
+                  const IconComponent = amenityIcon;
+                  return (
+                    <div key={index} className="flex items-center space-x-3">
+                      <IconComponent className="h-5 w-5 text-gray-600" />
+                      <span>{amenity}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -183,12 +216,12 @@ const PropertyDetail = () => {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <div>
-                    <span className="text-2xl font-bold">${property.price}</span>
+                    <span className="text-2xl font-bold">${property.price_per_night}</span>
                     <span className="text-gray-600"> / night</span>
                   </div>
                   <div className="flex items-center space-x-1">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-medium">{property.rating}</span>
+                    <span className="font-medium">4.9</span>
                   </div>
                 </CardTitle>
               </CardHeader>
@@ -222,7 +255,7 @@ const PropertyDetail = () => {
                       id="guests"
                       type="number"
                       min="1"
-                      max={property.maxGuests}
+                      max={property.max_guests}
                       value={guests}
                       onChange={(e) => setGuests(e.target.value)}
                     />
@@ -231,9 +264,9 @@ const PropertyDetail = () => {
                   <Button 
                     onClick={handleBooking}
                     className="w-full bg-rose-500 hover:bg-rose-600"
-                    disabled={!checkIn || !checkOut}
+                    disabled={!checkIn || !checkOut || createBooking.isPending}
                   >
-                    Reserve
+                    {createBooking.isPending ? 'Booking...' : 'Reserve'}
                   </Button>
                   
                   {checkIn && checkOut && (
