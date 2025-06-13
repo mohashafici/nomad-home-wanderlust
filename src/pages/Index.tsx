@@ -19,64 +19,110 @@ const Index = () => {
   // Mock data for featured properties (fallback if no real properties)
   const mockProperties = [
     {
-      id: 1,
+      id: "1",
       title: "Cozy Beachfront Villa",
-      location: "Malibu, California",
-      price: 299,
-      rating: 4.9,
-      reviews: 127,
-      image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=800",
-      host: "Sarah",
-      amenities: ["WiFi", "Pool", "Kitchen", "AC"]
+      address: "123 Beach Road",
+      city: "Malibu",
+      state: "California",
+      country: "United States",
+      postal_code: "90265",
+      price_per_night: 299,
+      average_rating: 4.9,
+      total_reviews: 127,
+      images: ["https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=800"],
+      host_id: "host1",
+      amenities: ["WiFi", "Pool", "Kitchen", "AC"],
+      property_type: "Villa",
+      description: "Beautiful beachfront villa with stunning ocean views",
+      bedrooms: 3,
+      bathrooms: 2,
+      max_guests: 6,
+      latitude: 34.0259,
+      longitude: -118.7798,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     },
     {
-      id: 2,
+      id: "2",
       title: "Modern Downtown Loft",
-      location: "New York, NY",
-      price: 189,
-      rating: 4.8,
-      reviews: 89,
-      image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=800",
-      host: "Michael",
-      amenities: ["WiFi", "Gym", "Kitchen", "Workspace"]
+      address: "456 Downtown Ave",
+      city: "New York",
+      state: "NY",
+      country: "United States",
+      postal_code: "10001",
+      price_per_night: 189,
+      average_rating: 4.8,
+      total_reviews: 89,
+      images: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=800"],
+      host_id: "host2",
+      amenities: ["WiFi", "Gym", "Kitchen", "Workspace"],
+      property_type: "Loft",
+      description: "Stylish loft in the heart of downtown",
+      bedrooms: 2,
+      bathrooms: 1,
+      max_guests: 4,
+      latitude: 40.7589,
+      longitude: -73.9851,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     },
     {
-      id: 3,
+      id: "3",
       title: "Rustic Mountain Cabin",
-      location: "Aspen, Colorado",
-      price: 225,
-      rating: 4.7,
-      reviews: 203,
-      image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&q=80&w=800",
-      host: "Emma",
-      amenities: ["WiFi", "Fireplace", "Kitchen", "Hot Tub"]
+      address: "789 Mountain Trail",
+      city: "Aspen",
+      state: "Colorado",
+      country: "United States",
+      postal_code: "81611",
+      price_per_night: 225,
+      average_rating: 4.7,
+      total_reviews: 203,
+      images: ["https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&q=80&w=800"],
+      host_id: "host3",
+      amenities: ["WiFi", "Fireplace", "Kitchen", "Hot Tub"],
+      property_type: "Cabin",
+      description: "Cozy cabin perfect for mountain getaways",
+      bedrooms: 4,
+      bathrooms: 3,
+      max_guests: 8,
+      latitude: 39.1911,
+      longitude: -106.8175,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     },
     {
-      id: 4,
+      id: "4",
       title: "Luxury City Penthouse",
-      location: "Miami, Florida",
-      price: 450,
-      rating: 4.9,
-      reviews: 76,
-      image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=800",
-      host: "David",
-      amenities: ["WiFi", "Pool", "Gym", "Concierge"]
+      address: "321 Luxury Lane",
+      city: "Miami",
+      state: "Florida",
+      country: "United States",
+      postal_code: "33101",
+      price_per_night: 450,
+      average_rating: 4.9,
+      total_reviews: 76,
+      images: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=800"],
+      host_id: "host4",
+      amenities: ["WiFi", "Pool", "Gym", "Concierge"],
+      property_type: "Penthouse",
+      description: "Stunning penthouse with panoramic city views",
+      bedrooms: 5,
+      bathrooms: 4,
+      max_guests: 10,
+      latitude: 25.7617,
+      longitude: -80.1918,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
   ];
 
-  // Convert real properties to display format or use mock data
+  // Use real properties if available, otherwise use mock data
   const displayProperties = properties && properties.length > 0 
-    ? properties.slice(0, 4).map(property => ({
-        id: Number(property.id.split('-')[0]) || Math.random(),
-        title: property.title,
-        location: `${property.city}, ${property.state}`,
-        price: Number(property.price_per_night),
-        rating: 4.8, // Default rating
-        reviews: 42, // Default review count
-        image: property.images?.[0] || "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=800",
-        host: "Host", // Default host name
-        amenities: property.amenities || []
-      }))
+    ? properties.slice(0, 4)
     : mockProperties;
 
   const handleSearch = () => {
