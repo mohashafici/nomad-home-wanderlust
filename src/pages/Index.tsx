@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { Search, MapPin, Calendar, Users, Star, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import PropertyCard from "@/components/PropertyCard";
 import { useProperties } from "@/hooks/useProperties";
@@ -13,6 +13,7 @@ const Index = () => {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState("1");
+  const navigate = useNavigate();
   
   const { data: properties, isLoading } = useProperties();
 
@@ -126,8 +127,14 @@ const Index = () => {
     : mockProperties;
 
   const handleSearch = () => {
-    console.log("Searching for:", { searchLocation, checkIn, checkOut, guests });
-    // TODO: Implement search functionality
+    // Navigate to properties page with search parameters
+    const searchParams = new URLSearchParams();
+    if (searchLocation) searchParams.set('location', searchLocation);
+    if (checkIn) searchParams.set('checkIn', checkIn);
+    if (checkOut) searchParams.set('checkOut', checkOut);
+    if (guests) searchParams.set('guests', guests);
+    
+    navigate(`/properties?${searchParams.toString()}`);
   };
 
   return (

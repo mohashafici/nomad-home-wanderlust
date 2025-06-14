@@ -3,6 +3,7 @@ import { Heart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Property = Tables<'properties'>;
@@ -13,6 +14,7 @@ interface PropertyCardProps {
 
 const PropertyCard = ({ property }: PropertyCardProps) => {
   const [isFavorite, setIsFavorite] = useState(false);
+  const navigate = useNavigate();
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -21,14 +23,13 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   };
 
   const handleCardClick = () => {
-    console.log("Navigate to property detail:", property.id);
-    // TODO: Navigate to property detail page
+    navigate(`/property/${property.id}`);
   };
 
   // Use the first image if available, otherwise use a placeholder
   const imageUrl = property.images && property.images.length > 0 
     ? property.images[0] 
-    : "/placeholder.svg";
+    : "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=800";
 
   // Create location string from city and state
   const location = `${property.city}, ${property.state}`;
