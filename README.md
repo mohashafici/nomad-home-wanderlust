@@ -6,9 +6,8 @@ This project is built with modern technologies and managed via the Lovable platf
 
 ## 🔗 Project Link
 
-Access your project here:  
-[https://lovable.dev/projects/1bf13b02-3e3e-4b4a-9601-d229976cc0f8](https://lovable.dev/projects/1bf13b02-3e3e-4b4a-9601-d229976cc0f8)
-
+# demo here
+(nomad-home-wanderlust.vercel.app)
 ---
 
 ## 🛠️ How to Edit the Code
