@@ -2,13 +2,8 @@
 
 This project is built with modern technologies and managed via the Lovable platform.
 
----
 
-## 🔗 Project Link
 
-# demo here
-(nomad-home-wanderlust.vercel.app)
----
 
 ## 🛠️ How to Edit the Code
 
